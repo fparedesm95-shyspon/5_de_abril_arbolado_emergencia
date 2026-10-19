@@ -8,9 +8,11 @@
         <meta name="apple-mobile-web-app-capable" content="yes">
         <link rel="stylesheet" href="css/leaflet.css">
         <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/L.Control.Locate.min.css">
         <link rel="stylesheet" href="css/qgis2web.css">
         <link rel="stylesheet" href="css/fontawesome-all.min.css">
         <link rel="stylesheet" href="css/leaflet.photon.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
         <style>
         #map {
             width: 1157px;
@@ -25,6 +27,7 @@
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/L.Control.Locate.min.js"></script>
         <script src="js/leaflet.rotatedMarker.js"></script>
         <script src="js/leaflet.pattern.js"></script>
         <script src="js/leaflet-hash.js"></script>
@@ -33,11 +36,12 @@
         <script src="js/labelgun.min.js"></script>
         <script src="js/labels.js"></script>
         <script src="js/leaflet.photon.js"></script>
+        <script src="js/leaflet-measure.js"></script>
         <script src="data/Fotos_1.js"></script>
         <script>
         var map = L.map('map', {
             zoomControl:false, maxZoom:28, minZoom:1
-        }).fitBounds([[-33.47630693257185,-70.72850577004043],[-33.45593022643043,-70.68714356337374]]);
+        }).fitBounds([[-33.47647703688499,-70.7326957078586],[-33.45610033074357,-70.6913335011919]]);
         var hash = new L.Hash(map);
         map.attributionControl.setPrefix('<a href="https://github.com/qgis2web/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
         var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
@@ -116,6 +120,17 @@
         var zoomControl = L.control.zoom({
             position: 'topleft'
         }).addTo(map);
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
         var bounds_group = new L.featureGroup([]);
         function setBounds() {
         }
@@ -136,19 +151,7 @@
                         <td colspan="2"><strong>photo</strong><br />' + (feature.properties['photo'] !== null ? '<img src="images/' + String(feature.properties['photo']).replace(/[\\/:]/g, '_').trim().replace(/'/g, '\'').replace(/"/g, '&quot;') + '">' : '') + '</td>\
                     </tr>\
                     <tr>\
-                        <td colspan="2"><strong>filename</strong><br />' + (feature.properties['filename'] !== null ? autolinker.link(String(feature.properties['filename']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2"><strong>directory</strong><br />' + (feature.properties['directory'] !== null ? '<img src="images/' + String(feature.properties['directory']).replace(/[\\/:]/g, '_').trim().replace(/'/g, '\'').replace(/"/g, '&quot;') + '">' : '') + '</td>\
-                    </tr>\
-                    <tr>\
                         <td colspan="2"><strong>altitude</strong><br />' + (feature.properties['altitude'] !== null ? autolinker.link(String(feature.properties['altitude']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2"><strong>direction</strong><br />' + (feature.properties['direction'] !== null ? autolinker.link(String(feature.properties['direction']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2"><strong>rotation</strong><br />' + (feature.properties['rotation'] !== null ? autolinker.link(String(feature.properties['rotation']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
                         <td colspan="2"><strong>longitude</strong><br />' + (feature.properties['longitude'] !== null ? autolinker.link(String(feature.properties['longitude']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
@@ -210,32 +213,34 @@
                 case 'Poda':
                     return {
                 pane: 'pane_Fotos_1',
-                radius: 4.0,
+                shape: 'diamond',
+                radius: 8.8,
                 opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
+                color: 'rgba(61,128,53,1.0)',
                 dashArray: '',
                 lineCap: 'butt',
                 lineJoin: 'miter',
-                weight: 1,
+                weight: 2.0,
                 fill: true,
                 fillOpacity: 1,
-                fillColor: 'rgba(41,219,106,1.0)',
+                fillColor: 'rgba(84,176,74,1.0)',
                 interactive: true,
             }
                     break;
                 case 'Tala':
                     return {
                 pane: 'pane_Fotos_1',
-                radius: 4.0,
+                shape: 'triangle',
+                radius: 8.0,
                 opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
+                color: 'rgba(128,17,25,1.0)',
                 dashArray: '',
                 lineCap: 'butt',
                 lineJoin: 'miter',
-                weight: 1,
+                weight: 2.0,
                 fill: true,
                 fillOpacity: 1,
-                fillColor: 'rgba(227,26,28,1.0)',
+                fillColor: 'rgba(219,30,42,1.0)',
                 interactive: true,
             }
                     break;
@@ -277,6 +282,19 @@
         });
         bounds_group.addLayer(layer_Fotos_1);
         map.addLayer(layer_Fotos_1);
+        var overlaysTree = [
+            {label: 'Fotos<br /><table><tr><td style="text-align: center;"><img src="legend/Fotos_1_Evaluar0.png" /></td><td>Evaluar</td></tr><tr><td style="text-align: center;"><img src="legend/Fotos_1_Evaluarraiz1.png" /></td><td>Evaluar raiz</td></tr><tr><td style="text-align: center;"><img src="legend/Fotos_1_Poda2.png" /></td><td>Poda</td></tr><tr><td style="text-align: center;"><img src="legend/Fotos_1_Tala3.png" /></td><td>Tala</td></tr><tr><td style="text-align: center;"><img src="legend/Fotos_1_4.png" /></td><td></td></tr></table>', layer: layer_Fotos_1},
+            {label: "Google Maps", layer: layer_GoogleMaps_0, radioGroup: 'bm' },]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
         setBounds();
         </script>
     </body>
